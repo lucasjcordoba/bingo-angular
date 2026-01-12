@@ -1,0 +1,269 @@
+<header class="topbar">
+  <div class="topbar__left">
+    <button class="icon-btn" type="button" (click)="toggleDrawer()" aria-label="Abrir menú" title="Menú">☰</button>
+  </div>
+
+  <h1 class="topbar__title">{{ state.title() }}</h1>
+
+  <div class="topbar__right">
+    <button class="btn btn--ghost" type="button" (click)="state.togglePresentation()" title="Modo presentación (P)">
+      {{ state.presentationMode() ? 'Salir presentación' : 'Presentación' }}
+    </button>
+
+    <button class="btn btn--ghost" type="button" (click)="toggleFullscreen()" title="Pantalla completa">
+      Pantalla completa
+    </button>
+  </div>
+</header>
+
+<!-- Drawer -->
+<div class="backdrop" *ngIf="state.drawerOpen()" (click)="state.closeDrawer()"></div>
+
+<aside class="drawer" [class.open]="state.drawerOpen()" aria-label="Configuración" [attr.aria-hidden]="!state.drawerOpen()">
+  <div class="drawer__header">
+    <div class="drawer__title">Configuración</div>
+    <button class="icon-btn" type="button" (click)="state.closeDrawer()" aria-label="Cerrar menú" title="Cerrar">✕</button>
+  </div>
+
+  <div class="drawer__content">
+
+    <!-- ✅ MODO -->
+    <section class="card">
+      <div class="card__title">Modo</div>
+
+      <label class="label label--light" for="modeSelect">Selector</label>
+      <select id="modeSelect" class="select-dark" [value]="state.mode()" (change)="state.setMode(($any($event.target)).value)">
+        <option value="analogico">Analógico (manual)</option>
+        <option value="digital">Bolillero digital (automático)</option>
+      </select>
+
+      <div class="hint hint--light">
+        Analógico: ingresás el número manualmente.<br>
+        Digital: Enter o “Girar” saca números sin repetir.
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__title">Evento</div>
+
+      <label class="label label--light" for="inputTitulo">Título</label>
+      <input id="inputTitulo" class="text-input text-input--dark" type="text"
+             [value]="state.title()"
+             (keydown.escape)="state.closeDrawer()"
+             #titleInput />
+
+      <div class="btn-row">
+        <button class="btn btn--primary" type="button" (click)="state.setTitle(titleInput.value)">Guardar</button>
+        <button class="btn btn--warn" type="button" (click)="state.resetTitle(); titleInput.value = state.title()">Reset</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__title">Fondo</div>
+
+      <label class="file-btn" for="bgFile">Subir imagen</label>
+      <input id="bgFile" type="file" accept="image/*" hidden
+             (change)="onBgFileSelected(($any($event.target)).files?.[0] ?? null); ($any($event.target)).value=''" />
+
+      <div class="btn-row">
+        <button class="btn btn--ghostDark" type="button" (click)="state.defaultBg()">Fondo default</button>
+        <button class="btn btn--ghostDark" type="button" (click)="state.clearBg()">Quitar fondo</button>
+      </div>
+
+      <div class="hint hint--light">Tip: imagen liviana (ideal &lt; 2–3 MB).</div>
+    </section>
+
+    <section class="card">
+      <div class="card__title">Premios</div>
+
+      <label class="label label--light" for="tipoPremio">Tipo</label>
+      <select id="tipoPremio" class="select-dark" #tipoPremio>
+        <option value="bingo">Bingo</option>
+        <option value="linea">Línea</option>
+      </select>
+
+      <div class="prize-add">
+        <input class="text-input text-input--dark" type="text" placeholder="Ej: Bicicleta / Libro / etc."
+               #premioInput
+               (keydown.enter)="addPrizeFromSelect(tipoPremio.value, premioInput.value); premioInput.value='';"
+        />
+        <button class="btn btn--primary" type="button"
+                (click)="addPrizeFromSelect(tipoPremio.value, premioInput.value); premioInput.value=''">
+          Agregar
+        </button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn--danger" type="button" (click)="state.clearPrizes()">Borrar premios</button>
+      </div>
+
+      <div class="hint hint--light">Se guardan automáticamente.</div>
+    </section>
+  </div>
+</aside>
+
+<main class="layout">
+  <!-- Left -->
+  <section class="lado lado--left">
+
+    <!-- ✅ ANALÓGICO: ingreso manual -->
+    <div class="panel" *ngIf="state.mode() === 'analogico'">
+      <div class="panel-head">
+        <label class="label" for="numero">Ingresar número</label>
+        <button class="icon-btn icon-btn--dark" type="button" (click)="state.toggleControls()" title="Mostrar/ocultar controles">
+          {{ state.controlsVisible() ? '👁' : '🙈' }}
+        </button>
+      </div>
+
+      <div class="input-row">
+        <input id="numero" class="num-input" maxlength="2" placeholder="00-99" inputmode="numeric"
+               #numInput
+               (input)="numInput.value = numInput.value.replace(/[^0-9]/g,'').slice(0,2)"
+               (keydown.enter)="onMarkFromValue(numInput.value) && (numInput.value='')"
+               (keydown.escape)="undo()"
+        />
+        <button class="btn btn--primary ingreso-control" type="button"
+                (click)="onMarkFromValue(numInput.value); numInput.value=''; numInput.focus()">
+          Marcar
+        </button>
+      </div>
+
+      <div class="btn-row ingreso-control">
+        <button class="btn btn--warn" type="button" (click)="undo()">Deshacer</button>
+        <button class="btn btn--danger" type="button" (click)="reset()">Reiniciar</button>
+      </div>
+
+      <div class="hint">
+        Atajos: <strong>Enter</strong> marcar, <strong>Esc</strong> deshacer, <strong>R</strong> reiniciar,
+        <strong>B</strong> bingo, <strong>L</strong> línea, <strong>I</strong> foco input, <strong>P</strong> presentación
+      </div>
+    </div>
+
+    <!-- ✅ DIGITAL: bolillero -->
+    <div class="panel" *ngIf="state.mode() === 'digital'">
+      <div class="panel-head">
+        <div>
+          <div class="label">Bolillero digital</div>
+          <div class="subtle">Tira números 00–99 sin repetir</div>
+        </div>
+
+        <button class="btn btn--primary" type="button" (click)="girar()" [disabled]="rolling()">
+          {{ rolling() ? 'Girando...' : 'Girar' }}
+        </button>
+      </div>
+
+      <div class="bolillero">
+        <div class="bola" [class.rolling]="rolling()">{{ rollingDisplay() }}</div>
+      </div>
+
+      <div class="hint">
+        Atajos: <strong>Enter</strong> girar, <strong>R</strong> reiniciar,
+        <strong>B</strong> bingo, <strong>L</strong> línea, <strong>P</strong> presentación
+      </div>
+    </div>
+
+    <div class="panel panel--compact">
+      <div class="historial">
+        <strong>Último:</strong>
+        <div class="ultimos">{{ state.lastNumber() }}</div>
+        <div class="btn-row">
+          <button class="btn btn--ghost" type="button" (click)="showLinea()">¡Línea!</button>
+          <button class="btn btn--ghost" type="button" (click)="showBingo()">¡Bingo!</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Center board -->
+  <section class="center">
+    <section id="tablero" aria-label="Tablero de Bingo">
+      <button
+        class="numero"
+        *ngFor="let n of [].constructor(100); let i = index"
+        [class.marcado]="state.history().includes(state.pad2(i))"
+        type="button"
+        (click)="onClickCell(state.pad2(i))"
+      >
+        {{ state.pad2(i) }}
+      </button>
+    </section>
+  </section>
+
+  <!-- Right -->
+  <section class="lado lado--right">
+    <div class="panel panel--hist">
+      <strong>Los que salieron:</strong>
+      <div class="numeros">{{ state.history().join(', ') }}</div>
+    </div>
+
+    <div class="panel panel--prizes">
+      <div class="card__title card__title--dark">Premios</div>
+
+      <div class="premios-seccion">
+        <div class="premios-seccion__titulo">Bingo</div>
+        <ul class="premios">
+          <li *ngFor="let p of state.prizes().bingo; let idx = index">
+            <span class="premio-text">{{ p }}</span>
+            <button class="premio-del" type="button" (click)="state.deletePrize('bingo', idx)">×</button>
+          </li>
+        </ul>
+        <div class="hint subtle" *ngIf="!state.prizes().bingo.length">Sin premios de Bingo.</div>
+      </div>
+
+      <div class="premios-seccion">
+        <div class="premios-seccion__titulo">Línea</div>
+        <ul class="premios">
+          <li *ngFor="let p of state.prizes().linea; let idx = index">
+            <span class="premio-text">{{ p }}</span>
+            <button class="premio-del" type="button" (click)="state.deletePrize('linea', idx)">×</button>
+          </li>
+        </ul>
+        <div class="hint subtle" *ngIf="!state.prizes().linea.length">Sin premios de Línea.</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Present bar (en digital: Enter ya gira global) -->
+<div class="present-bar">
+  <div class="present-bar__left">
+    <div class="present-last">
+      <div class="present-last__label">Último</div>
+      <div class="present-last__value">{{ state.lastNumber() }}</div>
+    </div>
+  </div>
+
+  <div class="present-bar__right" *ngIf="state.mode() === 'analogico'">
+    <input id="numeroPresent" class="num-input" maxlength="2" placeholder="00-99" inputmode="numeric"
+           #numInputP
+           (input)="numInputP.value = numInputP.value.replace(/[^0-9]/g,'').slice(0,2)"
+           (keydown.enter)="onMarkFromValue(numInputP.value) && (numInputP.value='')"
+           (keydown.escape)="undo()"
+    />
+    <button class="btn btn--primary" type="button" (click)="onMarkFromValue(numInputP.value); numInputP.value=''; numInputP.focus()">
+      Marcar
+    </button>
+    <button class="btn btn--warn" type="button" (click)="undo()">Deshacer</button>
+  </div>
+
+  <div class="present-bar__right" *ngIf="state.mode() === 'digital'">
+    <button class="btn btn--primary" type="button" (click)="girar()" [disabled]="rolling()">
+      {{ rolling() ? 'Girando...' : 'Girar' }}
+    </button>
+    <button class="btn btn--warn" type="button" (click)="undo()">Deshacer</button>
+  </div>
+</div>
+
+<!-- Overlays -->
+<div id="overlayNumero" [style.display]="overlayNumber() ? 'block' : 'none'">
+  {{ overlayNumber() }}
+</div>
+
+<div
+  id="eventoTexto"
+  [style.display]="eventText() ? 'block' : 'none'"
+  [class.bingo-color]="eventText()?.kind === 'bingo'"
+  [class.linea-color]="eventText()?.kind === 'linea'"
+>
+  {{ eventText()?.text }}
+</div>
