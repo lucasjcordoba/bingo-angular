@@ -5,7 +5,7 @@ import {
   SERVER_CONTEXT,
   renderApplication,
   renderModule
-} from "./chunk-3VX3PFEC.js";
+} from "./chunk-CODNRLNE.js";
 import "./chunk-F2AVBDEO.js";
 import "./chunk-HX3MX56I.js";
 import {
