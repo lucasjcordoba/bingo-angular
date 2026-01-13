@@ -84,6 +84,33 @@ Toda la configuración se realiza desde un **menú hamburguesa**, manteniendo la
 
 ---
 
+## Interfaz y diseño
+
+La aplicación está pensada para ser utilizada en **pantallas grandes** (televisores, proyectores o monitores), priorizando la legibilidad y el uso eficiente del espacio.
+
+### Distribución de la pantalla
+- Todas las secciones operativas se ubican en una **barra lateral izquierda**:
+  - Ingreso de número (modo analógico)
+  - Último número
+  - Historial de números salidos
+  - Premios (Bingo y Línea)
+- El **tablero de bingo ocupa todo el espacio restante** de la pantalla, maximizando su tamaño y visibilidad.
+
+Esta disposición permite una mejor lectura a distancia y evita distracciones innecesarias.
+
+### Tipografías y colores
+- Se utilizan fuentes modernas y legibles:
+  - **Nunito Sans** para el contenido general
+  - **Poppins** para títulos y encabezados
+- La paleta de colores busca un equilibrio entre sobriedad y claridad:
+  - Fondos claros para paneles
+  - Contraste alto para números y textos importantes
+  - Uso de color únicamente para acciones relevantes (Bingo, Línea, advertencias)
+
+El objetivo es mantener una estética institucional, clara y agradable, sin un aspecto monocromático o excesivamente plano.
+
+---
+
 ## Funcionalidades principales
 
 - Tablero de bingo del **00 al 99**
