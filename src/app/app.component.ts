@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import confetti from 'canvas-confetti';
+import { TutorialModalComponent } from './tutorial-modal.component';
 
 import { BingoStateService, PrizeType } from './bingo-state.service';
 import { ShortcutsService } from './shortcuts.service';
@@ -8,7 +9,7 @@ import { ShortcutsService } from './shortcuts.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TutorialModalComponent],
   templateUrl: './app.component.html',
 })
 export class AppComponent implements OnInit {
@@ -19,7 +20,8 @@ export class AppComponent implements OnInit {
 
   overlayNumber = signal<string | null>(null);
   eventText = signal<{ text: string; kind: 'bingo' | 'linea' } | null>(null);
-
+  tutorialOpen = signal<boolean>(true);
+  
   // ✅ Bolillero UI
   rolling = signal<boolean>(false);
   rollingDisplay = signal<string>('00'); // lo que se ve mientras “gira”

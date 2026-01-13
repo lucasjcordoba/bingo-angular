@@ -19,20 +19,31 @@
 <!-- Drawer -->
 <div class="backdrop" *ngIf="state.drawerOpen()" (click)="state.closeDrawer()"></div>
 
-<aside class="drawer" [class.open]="state.drawerOpen()" aria-label="Configuración" [attr.aria-hidden]="!state.drawerOpen()">
+<aside class="drawer" [class.open]="state.drawerOpen()" aria-label="Configuración"
+  [attr.aria-hidden]="!state.drawerOpen()">
   <div class="drawer__header">
     <div class="drawer__title">Configuración</div>
-    <button class="icon-btn" type="button" (click)="state.closeDrawer()" aria-label="Cerrar menú" title="Cerrar">✕</button>
+    <button class="icon-btn" type="button" (click)="state.closeDrawer()" aria-label="Cerrar menú"
+      title="Cerrar">✕</button>
   </div>
 
   <div class="drawer__content">
+
+    <section class="card">
+      <div class="card__title">Ayuda</div>
+      <button class="btn btn--ghostDark" type="button" (click)="tutorialOpen.set(true)">
+        Ver instructivo
+      </button>
+      <div class="hint hint--light">Guía rápida para operar el bingo.</div>
+    </section>
 
     <!-- ✅ MODO -->
     <section class="card">
       <div class="card__title">Modo</div>
 
       <label class="label label--light" for="modeSelect">Selector</label>
-      <select id="modeSelect" class="select-dark" [value]="state.mode()" (change)="state.setMode(($any($event.target)).value)">
+      <select id="modeSelect" class="select-dark" [value]="state.mode()"
+        (change)="state.setMode(($any($event.target)).value)">
         <option value="analogico">Analógico (manual)</option>
         <option value="digital">Bolillero digital (automático)</option>
       </select>
@@ -47,14 +58,13 @@
       <div class="card__title">Evento</div>
 
       <label class="label label--light" for="inputTitulo">Título</label>
-      <input id="inputTitulo" class="text-input text-input--dark" type="text"
-             [value]="state.title()"
-             (keydown.escape)="state.closeDrawer()"
-             #titleInput />
+      <input id="inputTitulo" class="text-input text-input--dark" type="text" [value]="state.title()"
+        (keydown.escape)="state.closeDrawer()" #titleInput />
 
       <div class="btn-row">
         <button class="btn btn--primary" type="button" (click)="state.setTitle(titleInput.value)">Guardar</button>
-        <button class="btn btn--warn" type="button" (click)="state.resetTitle(); titleInput.value = state.title()">Reset</button>
+        <button class="btn btn--warn" type="button"
+          (click)="state.resetTitle(); titleInput.value = state.title()">Reset</button>
       </div>
     </section>
 
@@ -63,7 +73,7 @@
 
       <label class="file-btn" for="bgFile">Subir imagen</label>
       <input id="bgFile" type="file" accept="image/*" hidden
-             (change)="onBgFileSelected(($any($event.target)).files?.[0] ?? null); ($any($event.target)).value=''" />
+        (change)="onBgFileSelected(($any($event.target)).files?.[0] ?? null); ($any($event.target)).value=''" />
 
       <div class="btn-row">
         <button class="btn btn--ghostDark" type="button" (click)="state.defaultBg()">Fondo default</button>
@@ -83,12 +93,10 @@
       </select>
 
       <div class="prize-add">
-        <input class="text-input text-input--dark" type="text" placeholder="Ej: Bicicleta / Libro / etc."
-               #premioInput
-               (keydown.enter)="addPrizeFromSelect(tipoPremio.value, premioInput.value); premioInput.value='';"
-        />
+        <input class="text-input text-input--dark" type="text" placeholder="Ej: Bicicleta / Libro / etc." #premioInput
+          (keydown.enter)="addPrizeFromSelect(tipoPremio.value, premioInput.value); premioInput.value='';" />
         <button class="btn btn--primary" type="button"
-                (click)="addPrizeFromSelect(tipoPremio.value, premioInput.value); premioInput.value=''">
+          (click)="addPrizeFromSelect(tipoPremio.value, premioInput.value); premioInput.value=''">
           Agregar
         </button>
       </div>
@@ -103,10 +111,10 @@
 </aside>
 
 <main class="layout">
-  <!-- Left -->
+  <!-- Left: TODO junto -->
   <section class="lado lado--left">
 
-    <!-- ✅ ANALÓGICO: ingreso manual -->
+    <!-- ANALÓGICO: ingreso manual -->
     <div class="panel" *ngIf="state.mode() === 'analogico'">
       <div class="panel-head">
         <label class="label" for="numero">Ingresar número</label>
@@ -139,7 +147,7 @@
       </div>
     </div>
 
-    <!-- ✅ DIGITAL: bolillero -->
+    <!-- DIGITAL: bolillero -->
     <div class="panel" *ngIf="state.mode() === 'digital'">
       <div class="panel-head">
         <div>
@@ -162,6 +170,7 @@
       </div>
     </div>
 
+    <!-- Último + botones -->
     <div class="panel panel--compact">
       <div class="historial">
         <strong>Último:</strong>
@@ -172,30 +181,14 @@
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- Center board -->
-  <section class="center">
-    <section id="tablero" aria-label="Tablero de Bingo">
-      <button
-        class="numero"
-        *ngFor="let n of [].constructor(100); let i = index"
-        [class.marcado]="state.history().includes(state.pad2(i))"
-        type="button"
-        (click)="onClickCell(state.pad2(i))"
-      >
-        {{ state.pad2(i) }}
-      </button>
-    </section>
-  </section>
-
-  <!-- Right -->
-  <section class="lado lado--right">
+    <!-- Los que salieron -->
     <div class="panel panel--hist">
       <strong>Los que salieron:</strong>
       <div class="numeros">{{ state.history().join(', ') }}</div>
     </div>
 
+    <!-- Premios -->
     <div class="panel panel--prizes">
       <div class="card__title card__title--dark">Premios</div>
 
@@ -221,6 +214,22 @@
         <div class="hint subtle" *ngIf="!state.prizes().linea.length">Sin premios de Línea.</div>
       </div>
     </div>
+
+  </section>
+
+  <!-- Center board: ahora ocupa el resto -->
+  <section class="center">
+    <section id="tablero" aria-label="Tablero de Bingo">
+      <button
+        class="numero"
+        *ngFor="let n of [].constructor(100); let i = index"
+        [class.marcado]="state.history().includes(state.pad2(i))"
+        type="button"
+        (click)="onClickCell(state.pad2(i))"
+      >
+        {{ state.pad2(i) }}
+      </button>
+    </section>
   </section>
 </main>
 
@@ -234,13 +243,11 @@
   </div>
 
   <div class="present-bar__right" *ngIf="state.mode() === 'analogico'">
-    <input id="numeroPresent" class="num-input" maxlength="2" placeholder="00-99" inputmode="numeric"
-           #numInputP
-           (input)="numInputP.value = numInputP.value.replace(/[^0-9]/g,'').slice(0,2)"
-           (keydown.enter)="onMarkFromValue(numInputP.value) && (numInputP.value='')"
-           (keydown.escape)="undo()"
-    />
-    <button class="btn btn--primary" type="button" (click)="onMarkFromValue(numInputP.value); numInputP.value=''; numInputP.focus()">
+    <input id="numeroPresent" class="num-input" maxlength="2" placeholder="00-99" inputmode="numeric" #numInputP
+      (input)="numInputP.value = numInputP.value.replace(/[^0-9]/g,'').slice(0,2)"
+      (keydown.enter)="onMarkFromValue(numInputP.value) && (numInputP.value='')" (keydown.escape)="undo()" />
+    <button class="btn btn--primary" type="button"
+      (click)="onMarkFromValue(numInputP.value); numInputP.value=''; numInputP.focus()">
       Marcar
     </button>
     <button class="btn btn--warn" type="button" (click)="undo()">Deshacer</button>
@@ -254,16 +261,15 @@
   </div>
 </div>
 
+<app-tutorial-modal *ngIf="tutorialOpen()" [mode]="state.mode()" (close)="tutorialOpen.set(false)">
+</app-tutorial-modal>
+
 <!-- Overlays -->
 <div id="overlayNumero" [style.display]="overlayNumber() ? 'block' : 'none'">
   {{ overlayNumber() }}
 </div>
 
-<div
-  id="eventoTexto"
-  [style.display]="eventText() ? 'block' : 'none'"
-  [class.bingo-color]="eventText()?.kind === 'bingo'"
-  [class.linea-color]="eventText()?.kind === 'linea'"
->
+<div id="eventoTexto" [style.display]="eventText() ? 'block' : 'none'"
+  [class.bingo-color]="eventText()?.kind === 'bingo'" [class.linea-color]="eventText()?.kind === 'linea'">
   {{ eventText()?.text }}
 </div>
